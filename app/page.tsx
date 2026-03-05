@@ -11,9 +11,9 @@ export default function Home() {
   const items = useMemo(
     () => [
       { key: "films" as const, label: "Films", href: "/films", video: "/videos/film.mp4" },
-      { key: "dev" as const, label: "Dev", href: "/dev", video: "/videos/spwebsite.mp4" },
-      { key: "design" as const, label: "Design", href: "/work?tag=design", video: "/videos/design.mp4" },
-      { key: "contact" as const, label: "Contact", href: "/contact", video: "/videos/contact.mp4" },
+      { key: "dev" as const, label: "Dev", href: "/dev", video: "/videos/spwebsite_1.mp4" },
+      { key: "design" as const, label: "Design", href: "/design", video: "/videos/design.mp4" },
+      { key: "contact" as const, label: "Contact", href: "/contact", video: "/videos/clouds.mp4" },
     ],
     []
   );
@@ -107,15 +107,13 @@ export default function Home() {
             );
           })}
 
-          <div style={{ marginTop: 22, color: "rgba(255,255,255,0.7)", fontSize: 13, maxWidth: 260 }}>
-            Hover to reveal the reel. Click to enter.
-          </div>
+          
         </nav>
 
         {/* Right column (optional copy) */}
         <section style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
           <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, maxWidth: 520, textAlign: "right" }}>
-            Motion, web, and design work. New York City.
+            video, web, and design work. NYC
           </div>
         </section>
       </main>
