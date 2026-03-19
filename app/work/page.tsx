@@ -20,7 +20,7 @@ const workQuery = `*[
 
 export default async function WorkPage({ searchParams }: PageProps) {
   const tag = searchParams?.tag ?? ""; // ALWAYS provide a value
-  const projects = await client.fetch(workQuery, { tag });
+  const projects = await client.fetch(workQuery, { tag } as Record<string, string>);
 
   return (
     <main style={{ padding: 24, maxWidth: 1100, margin: "0 auto" }}>

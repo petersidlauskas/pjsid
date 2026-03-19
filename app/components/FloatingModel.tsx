@@ -5,7 +5,12 @@ import { Environment, Float, OrbitControls, useGLTF } from "@react-three/drei";
 import { useRef } from "react";
 import * as THREE from "three";
 
-function Model({ url }: { url: string }) {
+type FloatingModelProps = {
+  url: string;
+  scale?: number;
+};
+
+function Model({ url, scale = 0.7 }: FloatingModelProps) {
   const group = useRef<THREE.Group>(null);
   const { scene } = useGLTF(url);
 
@@ -17,13 +22,16 @@ function Model({ url }: { url: string }) {
   });
 
   return (
-    <group ref={group} scale={0.7}>
+    <group ref={group} scale={scale}>
       <primitive object={scene} />
     </group>
   );
 }
 
-export default function FloatingModel({ url }: { url: string }) {
+export default function FloatingModel({
+  url,
+  scale = 0.7,
+}: FloatingModelProps) {
   return (
     <div
       style={{
@@ -33,16 +41,15 @@ export default function FloatingModel({ url }: { url: string }) {
         pointerEvents: "none",
       }}
     >
-      <Canvas camera={{ position: [5, 8, 4], fov: 50 }}>
+      <Canvas camera={{ position: [3, 3, 3], fov: 50 }}>
         <ambientLight intensity={0.1} />
         <directionalLight position={[10, 30, 3]} intensity={0.1} />
         <Environment preset="city" />
 
         <Float speed={9.2} rotationIntensity={1.6} floatIntensity={2.8}>
-          <Model url={url} />
+          <Model url={url} scale={scale} />
         </Float>
 
-        {/* optional: controls, but pointerEvents is none so it won’t interfere */}
         <OrbitControls enableZoom={false} enablePan={false} />
       </Canvas>
     </div>
