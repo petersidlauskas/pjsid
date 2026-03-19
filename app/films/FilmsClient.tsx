@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import FloatingModel from "../components/FloatingModel";
 
 type FilmProject = {
@@ -19,7 +19,6 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
   const [openProject, setOpenProject] = useState<FilmProject | null>(null);
 
   useEffect(() => {
-    // Fade in on mount
     const t = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(t);
   }, []);
@@ -29,7 +28,9 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
     [projects, activeId]
   );
 
-  const bgVideo = activeProject?.hoverVideoUrl;
+  const bgVideo = activeProject?.hoverVideoUrl
+    ? activeProject.hoverVideoUrl.replace("http://localhost:3000", "")
+    : null;
 
   return (
     <div
@@ -40,25 +41,22 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
         background: "black",
       }}
     >
-      {/* Background video on hover */}
       {bgVideo ? <VideoBackground src={bgVideo} /> : null}
 
-      {/* Optional readability overlay when video is present */}
       {bgVideo ? (
         <div
           style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(0,0,0,0.5)",
+            background: "rgba(0,0,0,0.35)",
             zIndex: 1,
+            pointerEvents: "none",
           }}
         />
       ) : null}
 
-      {/* Spinning bolt always */}
       <FloatingModel url="/models/model.glb" scale={0.28} />
 
-      {/* Page content */}
       <main
         style={{
           position: "relative",
@@ -68,15 +66,11 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
           display: "grid",
           gridTemplateColumns: "420px 1fr",
           gap: 24,
-
-          // fade in
           opacity: mounted ? 1 : 0,
-        transform: "translateY(0px)", // remove movement for a pure fade
-            transition: "opacity 100ms cubic-bezier(0.22, 1, 0.36, 1) 120ms",
-
+          transform: "translateY(0px)",
+          transition: "opacity 100ms cubic-bezier(0.22, 1, 0.36, 1) 120ms",
         }}
       >
-        {/* LEFT: list */}
         <section
           style={{
             display: "flex",
@@ -86,11 +80,18 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
           }}
         >
           <div style={{ marginBottom: 14 }}>
-            <Link href="/" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
+            <Link
+              href="/"
+              style={{
+                color: "rgba(255,255,255,0.7)",
+                textDecoration: "none",
+              }}
+            >
               ← Home
             </Link>
-            <h1 style={{ color: "white", fontSize: 44, margin: "10px 0 0" }}>Films</h1>
-            
+            <h1 style={{ color: "white", fontSize: 44, margin: "10px 0 0" }}>
+              Films
+            </h1>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -111,22 +112,39 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
                     border: "none",
                     padding: 0,
                     cursor: "pointer",
-
-                    opacity: isActive ? 1 : 1,
                     transform: isActive ? "translateX(8px)" : "translateX(0px)",
                     transition: "transform 180ms ease, opacity 180ms ease",
                     color: "white",
                   }}
                 >
-                  <div style={{ fontSize: 22, lineHeight: 1.15, fontWeight: 'bold' }}>
+                  <div
+                    style={{
+                      fontSize: 22,
+                      lineHeight: 1.15,
+                      fontWeight: "bold",
+                    }}
+                  >
                     {p.title ?? "Untitled"}
                   </div>
 
-                  <div style={{ marginTop: 6, color: "rgba(255,255,255)", fontSize: 13 }}>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      color: "rgba(255,255,255,1)",
+                      fontSize: 13,
+                    }}
+                  >
                     {p.year ?? ""}
                   </div>
 
-                  <div style={{ marginTop: 4, color: "rgba(255,255,255)", fontSize: 13, fontWeight: 'bold' }}>
+                  <div
+                    style={{
+                      marginTop: 4,
+                      color: "rgba(255,255,255,1)",
+                      fontSize: 13,
+                      fontWeight: "bold",
+                    }}
+                  >
                     {p.client ?? ""}
                   </div>
                 </button>
@@ -135,33 +153,62 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
           </div>
         </section>
 
-        {/* RIGHT: empty / optional */}
-        <section style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
-          <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 14, maxWidth: 520, textAlign: "right" }}>
+        <section
+          style={{
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "flex-end",
+          }}
+        >
+          <div
+            style={{
+              color: "rgba(255,255,255,0.55)",
+              fontSize: 14,
+              maxWidth: 520,
+              textAlign: "right",
+            }}
+          >
             Director / Editor — NYC
           </div>
         </section>
       </main>
 
-      {/* Vimeo modal */}
       {openProject ? (
-  <YouTubeModal project={openProject} onClose={() => setOpenProject(null)} />
-) : null}
-
+        <YouTubeModal project={openProject} onClose={() => setOpenProject(null)} />
+      ) : null}
     </div>
   );
 }
 
 function VideoBackground({ src }: { src: string }) {
-  // Hard switch; if you want crossfade, I’ll upgrade it.
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+
+    video.currentTime = 0;
+    video.load();
+
+    const playPromise = video.play();
+    if (playPromise) {
+      playPromise.catch((err) => {
+        console.error("Video play failed:", src, err);
+      });
+    }
+  }, [src]);
+
   return (
     <video
+      ref={ref}
       key={src}
-      autoPlay
+      src={src}
       muted
       loop
       playsInline
       preload="auto"
+      autoPlay
+      onError={() => console.error("Video failed to load:", src)}
       style={{
         position: "absolute",
         inset: 0,
@@ -169,10 +216,9 @@ function VideoBackground({ src }: { src: string }) {
         height: "100%",
         objectFit: "cover",
         zIndex: 0,
+        pointerEvents: "none",
       }}
-    >
-      <source src={src} type="video/mp4" />
-    </video>
+    />
   );
 }
 
@@ -250,15 +296,9 @@ function YouTubeModal({ project, onClose }: { project: FilmProject; onClose: () 
   );
 }
 
-
 function extractYouTubeId(url?: string) {
   if (!url) return null;
 
-  // Handles:
-  // https://www.youtube.com/watch?v=VIDEO_ID
-  // https://youtu.be/VIDEO_ID
-  // https://www.youtube.com/embed/VIDEO_ID
-  // https://www.youtube.com/shorts/VIDEO_ID
   const patterns = [
     /youtube\.com\/watch\?v=([^&]+)/,
     /youtu\.be\/([^?&]+)/,
@@ -272,4 +312,3 @@ function extractYouTubeId(url?: string) {
   }
   return null;
 }
-
