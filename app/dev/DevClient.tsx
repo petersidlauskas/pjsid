@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import FloatingModel from "../components/FloatingModel";
 import { urlFor } from "@/lib/image";
+import BackgroundVideo from "../components/BackgroundVideo";
 
 type DevProject = {
   _id: string;
@@ -31,7 +32,7 @@ export default function DevClient({ projects }: { projects: DevProject[] }) {
 
   return (
     <div style={{ position: "relative", minHeight: "100vh", background: "black" }}>
-      {/* Bolt always on top of preview, never blocks clicks */}
+      <BackgroundVideo />
       <div style={{ position: "fixed", inset: 0, zIndex: 2, pointerEvents: "none" }}>
         <FloatingModel url="/models/model.glb" scale={0.28} />
       </div>
@@ -41,7 +42,7 @@ export default function DevClient({ projects }: { projects: DevProject[] }) {
           position: "relative",
           minHeight: "100vh",
           padding: 32,
-          maxWidth: 1200,
+     
           margin: "0 auto",
           display: "grid",
           gridTemplateColumns: "420px minmax(0, 1fr)",
@@ -50,61 +51,88 @@ export default function DevClient({ projects }: { projects: DevProject[] }) {
           transition: "opacity 900ms cubic-bezier(0.22, 1, 0.36, 1) 120ms",
         }}
       >
-        {/* LEFT COLUMN */}
         <section style={{ position: "relative", zIndex: 3 }}>
           <Link href="/" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
             ← Home
           </Link>
 
-          <h1 style={{ color: "white", fontSize: 44, margin: "12px 0 22px" }}>Dev</h1>
+          
+
+          <h1 style={{ color: "yellow", fontSize: 24, fontFamily:"Neue Haas Bold", margin: "12px 0 22px" }}>Dev</h1>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
             {projects.map((p) => {
               const isActive = p._id === activeId;
+
+              const cardStyles: React.CSSProperties = {
+                display: "block",
+                transform: isActive ? "translateX(8px)" : "translateX(0)",
+                transition: "transform 180ms ease",
+                color: "white",
+                textDecoration: "none",
+                cursor: p.devLink ? "pointer" : "default",
+              };
+
+              
+
+              const content = (
+                <>
+                  <div style={{ fontSize: 22, fontWeight: 700 }}>{p.title ?? "Untitled"}</div>
+                  <div style={{ fontSize: 12, opacity: 0.85 }}>{p.year ?? ""}</div>
+                  <div style={{ fontSize: 12, opacity: 0.85 }}>{p.client ?? ""}</div>
+
+                  {p.devLink ? (
+                    <div
+                      style={{
+                        display: "inline-block",
+                        marginTop: 6,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "white",
+                        textDecoration: "underline",
+                        wordBreak: "break-all",
+                      }}
+                    >
+                      {p.devLink}
+                    </div>
+                  ) : null}
+                </>
+              );
+
+              if (p.devLink) {
+                return (
+                  <a
+                    key={p._id}
+                    href={p.devLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    onMouseEnter={() => setActiveId(p._id)}
+                    onMouseLeave={() => setActiveId(null)}
+                    style={cardStyles}
+                  >
+                    {content}
+                  </a>
+                );
+              }
 
               return (
                 <div
                   key={p._id}
                   onMouseEnter={() => setActiveId(p._id)}
                   onMouseLeave={() => setActiveId(null)}
-                  style={{
-                    transform: isActive ? "translateX(8px)" : "translateX(0)",
-                    transition: "transform 180ms ease",
-                    color: "white",
-                  }}
+                  style={cardStyles}
                 >
-                  <div style={{ fontSize: 22, fontWeight: 700 }}>{p.title ?? "Untitled"}</div>
-                  <div style={{ fontSize: 13, opacity: 0.85 }}>{p.year ?? ""}</div>
-                  <div style={{ fontSize: 13, opacity: 0.85 }}>{p.client ?? ""}</div>
-
-                  {p.devLink ? (
-                    <a
-                      href={p.devLink}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{
-                        display: "inline-block",
-                        marginTop: 6,
-                        fontSize: 13,
-                        fontWeight: 700,
-                        color: "white",
-                        textDecoration: "underline",
-                      }}
-                    >
-                      {p.devLink}
-                    </a>
-                  ) : null}
+                  {content}
                 </div>
               );
             })}
           </div>
         </section>
 
-        {/* RIGHT COLUMN PREVIEW (SMALL + STICKY) */}
         <section
           style={{
             position: "relative",
-            zIndex: 1, // behind bolt
+            zIndex: 1,
             display: "flex",
             justifyContent: "flex-start",
           }}
@@ -113,22 +141,15 @@ export default function DevClient({ projects }: { projects: DevProject[] }) {
             style={{
               position: "sticky",
               top: 120,
-
-              // ✅ small rectangle size:
               width: 720,
               height: 480,
-
-              // ✅ responsive fallback (so it doesn't overflow on small screens)
               maxWidth: "100%",
-
               borderRadius: 8,
               overflow: "hidden",
-              
-            
               boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
               backdropFilter: "blur(6px)",
               opacity: activeProject?.hoverImage ? 1 : 0,
-      transition: "opacity 320ms ease",
+              transition: "opacity 320ms ease",
             }}
           >
             {activeProject?.hoverImage ? (
@@ -152,12 +173,9 @@ export default function DevClient({ projects }: { projects: DevProject[] }) {
                   textAlign: "center",
                   padding: 16,
                 }}
-              >
-                
-              </div>
+              />
             )}
 
-            {/* subtle dark gradient */}
             <div
               style={{
                 position: "absolute",
@@ -171,3 +189,4 @@ export default function DevClient({ projects }: { projects: DevProject[] }) {
     </div>
   );
 }
+

@@ -1,10 +1,12 @@
 import Link from "next/link";
 import FloatingModel from "../components/FloatingModel";
+import BackgroundVideo from "../components/BackgroundVideo";
 
 export default function ContactPage() {
   return (
     <div style={{ position: "relative", minHeight: "100vh", background: "black" }}>
       {/* 3D background (cannot block clicks) */}
+      <BackgroundVideo />
       <div
         style={{
           position: "fixed",
@@ -27,15 +29,15 @@ export default function ContactPage() {
         }}
       >
         <Link href="/" style={{ display: "inline-block", marginBottom: "30px", color: "white" }}>
-          ← Back to Home
+          ← Home
         </Link>
 
-        <h1 style={{ fontSize: "32px", marginBottom: "30px" }}>Contact</h1>
+        <h1 style={{ fontSize: "24px", fontFamily:"Neue Haas Bold", marginBottom: "30px", color:"yellow" }}>Contact</h1>
 
         <div style={{ fontSize: "12px", lineHeight: "2", color: "rgba(255,255,255,0.85)", letterSpacing: 1 }}>
           <p>
             Email:{" "}
-            <a href="mailto:youremail@email.com" style={{ color: "white", textDecoration: "underline" }}>
+            <a href="mailto:info@pjsid.com" style={{ color: "white", textDecoration: "underline" }}>
               info@pjsid.com
             </a>
           </p>

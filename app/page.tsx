@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import FloatingModel from "./components/FloatingModel";
 import TransitionLink from "./components/TransitionLink";
+import NycInfo from "./components/NycInfo";
+import BackgroundVideo from "./components/BackgroundVideo";
 
 type MenuKey = "films" | "dev" | "design" | "contact";
 
 export default function Home() {
   const items = useMemo(
     () => [
-      { key: "films" as const, label: "Films", href: "/films", video: "/videos/film.mp4" },
+      { key: "films" as const, label: "Film", href: "/films", video: "/videos/film.mp4" },
       { key: "dev" as const, label: "Dev", href: "/dev", video: "/videos/spwebsite_1.mp4" },
       { key: "design" as const, label: "Design", href: "/design", video: "/videos/design.mp4" },
       { key: "contact" as const, label: "Contact", href: "/contact", video: "/videos/clouds.mp4" },
@@ -21,7 +23,18 @@ export default function Home() {
   // 👇 DEFAULT: no active section
   const [active, setActive] = useState<MenuKey | null>(null);
 
-  const activeVideo = items.find((i) => i.key === active)?.video;
+  const [isMobile, setIsMobile] = useState(false);
+
+useEffect(() => {
+  const check = () => setIsMobile(window.innerWidth < 768);
+  check();
+  window.addEventListener("resize", check);
+  return () => window.removeEventListener("resize", check);
+}, []);
+
+  const activeVideo = isMobile
+  ? "/videos/film.mp4"
+  : items.find((i) => i.key === active)?.video;
 
   return (
     <div
@@ -33,7 +46,9 @@ export default function Home() {
       }}
     >
       {/* Layer 0: background video ONLY when hovering */}
-      {activeVideo && <VideoBackground src={activeVideo} />}
+      
+
+<BackgroundVideo src={activeVideo} />
 
       {/* Layer 1: dark overlay ONLY when video exists */}
       {activeVideo && (
@@ -41,7 +56,7 @@ export default function Home() {
           style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(0,0,0,0.75)",
+            background: "rgba(0,0,0,0.5)",
             zIndex: 1,
           }}
         />
@@ -57,7 +72,7 @@ export default function Home() {
           zIndex: 3,
           minHeight: "100vh",
           display: "grid",
-          gridTemplateColumns: "320px 1fr",
+          gridTemplateColumns: isMobile ? "1fr" : "320px 1fr",
           padding: 32,
           gap: 24,
         }}
@@ -73,8 +88,8 @@ export default function Home() {
           onMouseLeave={() => setActive(null)} // 👈 return to black
         >
           <div style={{ marginBottom: 18 }}>
-            <div style={{ color: "rgba(255,255,255,0.85)", letterSpacing: 1, fontSize: 12 }}>
-              peter sidlauskas
+            <div style={{ color: "rgba(255,255,255,0.85)", letterSpacing: 1, fontSize: 12, fontFamily: 'Neue Haas Light' }}>
+              
             </div>
            
           </div>
@@ -91,7 +106,7 @@ export default function Home() {
               onFocus={() => setActive(item.key)}
               style={{
                 textDecoration: "none",
-                color: "white",
+                color: isActive ? "yellow" : "white",
                 fontSize: 44,
                 lineHeight: 1.02,
                 letterSpacing: -0.5,
@@ -111,11 +126,35 @@ export default function Home() {
         </nav>
 
         {/* Right column (optional copy) */}
-        <section style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
-          <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, maxWidth: 520, textAlign: "right" }}>
-            video, web, and design work. NYC
-          </div>
-        </section>
+<section
+  style={{
+    display: "flex",
+    alignItems: isMobile ? "flex-start" : "flex-end",
+    justifyContent: isMobile ? "flex-start" : "flex-end",
+    flexDirection: "column",
+  }}
+>
+  <div
+    style={{
+      color: "rgba(255,255,255,0.7)",
+      fontSize: 14,
+      textAlign: isMobile ? "left" : "right",
+      fontFamily: "Neue Haas Bold",
+      width: "100%",
+    }}
+  >
+    peter sidlauskas
+  </div>
+
+  <div
+    style={{
+      width: "100%",
+      textAlign: isMobile ? "left" : "right",
+    }}
+  >
+    <NycInfo isMobile={isMobile} />
+  </div>
+</section>
       </main>
     </div>
   );

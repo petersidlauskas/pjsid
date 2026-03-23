@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import FloatingModel from "../components/FloatingModel";
+import BackgroundVideo from "../components/BackgroundVideo";
 
 type FilmProject = {
   _id: string;
@@ -17,10 +18,18 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
   const [mounted, setMounted] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [openProject, setOpenProject] = useState<FilmProject | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(t);
+  }, []);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
   const activeProject = useMemo(
@@ -41,7 +50,7 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
         background: "black",
       }}
     >
-      {bgVideo ? <VideoBackground src={bgVideo} /> : null}
+      <BackgroundVideo src={bgVideo} />
 
       {bgVideo ? (
         <div
@@ -62,10 +71,10 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
           position: "relative",
           zIndex: 3,
           minHeight: "100vh",
-          padding: 32,
+          padding: isMobile ? 20 : 32,
           display: "grid",
-          gridTemplateColumns: "420px 1fr",
-          gap: 24,
+          gridTemplateColumns: isMobile ? "1fr" : "420px 1fr",
+          gap: isMobile ? 20 : 24,
           opacity: mounted ? 1 : 0,
           transform: "translateY(0px)",
           transition: "opacity 100ms cubic-bezier(0.22, 1, 0.36, 1) 120ms",
@@ -76,7 +85,8 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
             display: "flex",
             flexDirection: "column",
             gap: 14,
-            alignSelf: "center",
+            alignSelf: isMobile ? "flex-start" : "center",
+            minWidth: 0,
           }}
         >
           <div style={{ marginBottom: 14 }}>
@@ -85,16 +95,31 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
               style={{
                 color: "rgba(255,255,255,0.7)",
                 textDecoration: "none",
+                fontSize: isMobile ? 13 : 14,
               }}
             >
               ← Home
             </Link>
-            <h1 style={{ color: "white", fontSize: 44, margin: "10px 0 0" }}>
+
+            <h1
+              style={{
+                color: "yellow",
+                fontSize: isMobile ? 20 : 24,
+                fontFamily: "Neue Haas Bold",
+                margin: "10px 0 0",
+              }}
+            >
               Films
             </h1>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: isMobile ? 20 : 30,
+            }}
+          >
             {projects.map((p) => {
               const isActive = p._id === activeId;
 
@@ -102,9 +127,9 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
                 <button
                   key={p._id}
                   type="button"
-                  onMouseEnter={() => setActiveId(p._id)}
+                  onMouseEnter={() => !isMobile && setActiveId(p._id)}
                   onFocus={() => setActiveId(p._id)}
-                  onMouseLeave={() => setActiveId(null)}
+                  onMouseLeave={() => !isMobile && setActiveId(null)}
                   onClick={() => setOpenProject(p)}
                   style={{
                     textAlign: "left",
@@ -112,16 +137,20 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
                     border: "none",
                     padding: 0,
                     cursor: "pointer",
-                    transform: isActive ? "translateX(8px)" : "translateX(0px)",
+                    transform: !isMobile && isActive ? "translateX(8px)" : "translateX(0px)",
                     transition: "transform 180ms ease, opacity 180ms ease",
                     color: "white",
+                    minWidth: 0,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: 22,
+                      fontSize: isMobile ? 16 : 22,
                       lineHeight: 1.15,
                       fontWeight: "bold",
+                      fontFamily: "Neue Haas Bold",
+                      wordBreak: "break-word",
+                      overflowWrap: "anywhere",
                     }}
                   >
                     {p.title ?? "Untitled"}
@@ -131,7 +160,8 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
                     style={{
                       marginTop: 6,
                       color: "rgba(255,255,255,1)",
-                      fontSize: 13,
+                      fontSize: isMobile ? 11 : 12,
+                      fontFamily: "Neue Haas Medium",
                     }}
                   >
                     {p.year ?? ""}
@@ -141,8 +171,10 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
                     style={{
                       marginTop: 4,
                       color: "rgba(255,255,255,1)",
-                      fontSize: 13,
-                      fontWeight: "bold",
+                      fontSize: isMobile ? 12 : 14,
+                      fontFamily: "Neue Haas Bold",
+                      wordBreak: "break-word",
+                      overflowWrap: "anywhere",
                     }}
                   >
                     {p.client ?? ""}
@@ -155,7 +187,7 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
 
         <section
           style={{
-            display: "flex",
+            display: isMobile ? "none" : "flex",
             alignItems: "flex-end",
             justifyContent: "flex-end",
           }}
@@ -167,9 +199,7 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
               maxWidth: 520,
               textAlign: "right",
             }}
-          >
-            Director / Editor — NYC
-          </div>
+          />
         </section>
       </main>
 
@@ -177,48 +207,6 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
         <YouTubeModal project={openProject} onClose={() => setOpenProject(null)} />
       ) : null}
     </div>
-  );
-}
-
-function VideoBackground({ src }: { src: string }) {
-  const ref = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = ref.current;
-    if (!video) return;
-
-    video.currentTime = 0;
-    video.load();
-
-    const playPromise = video.play();
-    if (playPromise) {
-      playPromise.catch((err) => {
-        console.error("Video play failed:", src, err);
-      });
-    }
-  }, [src]);
-
-  return (
-    <video
-      ref={ref}
-      key={src}
-      src={src}
-      muted
-      loop
-      playsInline
-      preload="auto"
-      autoPlay
-      onError={() => console.error("Video failed to load:", src)}
-      style={{
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-        zIndex: 0,
-        pointerEvents: "none",
-      }}
-    />
   );
 }
 
@@ -245,7 +233,7 @@ function YouTubeModal({ project, onClose }: { project: FilmProject; onClose: () 
         background: "rgba(0,0,0,0.75)",
         display: "grid",
         placeItems: "center",
-        padding: 24,
+        padding: isTouchDevice() ? 12 : 24,
       }}
     >
       <div
@@ -311,4 +299,9 @@ function extractYouTubeId(url?: string) {
     if (m?.[1]) return m[1];
   }
   return null;
+}
+
+function isTouchDevice() {
+  if (typeof window === "undefined") return false;
+  return window.innerWidth < 768;
 }

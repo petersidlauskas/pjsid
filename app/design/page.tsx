@@ -23,7 +23,7 @@ export default function DesignPage() {
 
       {/* Back button */}
       <Link href="/" style={{ display: "inline-block", marginBottom: 20 }}>
-        ← Back to Home
+        ← Home
       </Link>
 
       <DesignCarousel images={images} />

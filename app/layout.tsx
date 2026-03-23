@@ -4,6 +4,7 @@ import "./globals.css";
 import TransitionProvider from "./components/TransitionProvider";
 import BoltBackground from "./components/BoltBackground";
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
