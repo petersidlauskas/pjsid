@@ -38,8 +38,8 @@ export default function FilmsClient({ projects }: { projects: FilmProject[] }) {
   );
 
   const bgVideo = activeProject?.hoverVideoUrl
-    ? activeProject.hoverVideoUrl.replace("http://localhost:3000", "")
-    : null;
+  ? activeProject.hoverVideoUrl.replace("http://localhost:3000", "")
+  : undefined;
 
   return (
     <div
